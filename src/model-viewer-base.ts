@@ -35,7 +35,7 @@ import { ContextLostEvent, Renderer } from "./three-components/Renderer.js";
 import { clamp, debounce } from "./utilities.js";
 import { ProgressTracker } from "./utilities/progress-tracker.js";
 import { checkHashTextContent, createBlobUrlFromBuffer } from "./hash.js";
-
+export const hash_b = "FhKNXFSzTtoA"
 const CLEAR_MODEL_TIMEOUT_MS = 10;
 const FALLBACK_SIZE_UPDATE_THRESHOLD_MS = 50;
 const ANNOUNCE_MODEL_VISIBILITY_DEBOUNCE_THRESHOLD = 0;
