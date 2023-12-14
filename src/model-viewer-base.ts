@@ -256,22 +256,7 @@ export default class ModelViewerElementBase extends ReactiveElement {
    */
   constructor() {
     super();
-    const that = this;
-    fetch(this.src || "")
-      .then(async (res) => {
-        return await res.arrayBuffer();
-      })
-      .then((arrayBuffer) => {
-        if (checkHashTextContent(arrayBuffer, this.hashedContent)) {
-          const blobURL = createBlobUrlFromBuffer(
-            arrayBuffer,
-            "model/gltf-binary"
-          );
-          that.constructModel(blobURL);
-        } else {
-          return;
-        }
-      });
+
     this.attachShadow({ mode: "open" });
     const shadowRoot = this.shadowRoot!;
 
@@ -369,11 +354,6 @@ export default class ModelViewerElementBase extends ReactiveElement {
       // at all times:
       this[$isElementInViewport] = true;
     }
-  }
-
-  constructModel(blobURL: string) {
-    this.originUrl = `${this.src}`;
-    this.src = blobURL;
   }
 
   connectedCallback() {
@@ -660,6 +640,17 @@ export default class ModelViewerElementBase extends ReactiveElement {
     );
   };
 
+  async getBlobURL(src: string) {
+    const arrayBuffer = await (await fetch(src)).arrayBuffer();
+    if (checkHashTextContent(arrayBuffer, this.hashedContent)) {
+      const blobURL = createBlobUrlFromBuffer(arrayBuffer, "model/gltf-binary");
+      this.originUrl = `${this.src}`;
+      return blobURL
+    } else {
+      return null;
+    }
+  }
+
   /**
    * Parses the element for an appropriate source URL and
    * sets the views to use the new model based.
@@ -685,7 +676,10 @@ export default class ModelViewerElementBase extends ReactiveElement {
     scene.stopAnimation();
 
     const updateSourceProgress = this[$progressTracker].beginActivity();
-    const source = this.src;
+    const source = await this.getBlobURL(this.src || '');
+    if(source === null){
+      return;
+    }
     try {
       const srcUpdated = scene.setSource(source, (progress: number) =>
         updateSourceProgress(clamp(progress, 0, 1) * 0.95)
